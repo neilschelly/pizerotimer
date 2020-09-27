@@ -65,3 +65,6 @@ sudo ./pizerotimer.py
 * Provide some simple web UI to see/edit the database time range entries
 * Clean up old database time range entries automatically
 * If it crashes for some reason, any existing timers won't get stopped.
+* Maybe the screen should blink on whenever the elapsed_time crosses an hour?
+* Draw a progress bar from 0 - 40 hours?
+* Display the day of the week.
