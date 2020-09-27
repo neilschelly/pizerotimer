@@ -37,9 +37,11 @@ sudo ./pizerotimer.py
 
 ![PiZeroTimer](/docs/device.jpg)
 
-I run it on a [Raspberry Pi Zero W](https://www.adafruit.com/product/3400) with
+I run it on a [Raspberry Pi Zero WH](https://www.adafruit.com/product/3708) with
 a [Mini PiTFT screen](https://www.adafruit.com/product/4484) attached with
-Python3.
+Python3. It'll probably run on any Pi and the GPIO headers (optional on the Pi
+Zero) are necessary to attach the screen that I chose. You can add headers to a
+Pi Zero without them with simple soldering skills.
 
 ## Installation
 
