@@ -35,6 +35,8 @@ sudo ./pizerotimer.py
 
 ## Hardware
 
+![PiZeroTimer](/docs/device.jpg)
+
 I run it on a [Raspberry Pi Zero W](https://www.adafruit.com/product/3400) with
 a [Mini PiTFT screen](https://www.adafruit.com/product/4484) attached with
 Python3.
