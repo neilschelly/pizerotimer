@@ -54,17 +54,15 @@ sudo pip3 install -r requirements.txt
 sudo ./pizerotimer.py
 ```
 
+Put the `pizerotimer.yml` file at `/etc/pizerotimer.yml` and create the
+directory that your SQLite database will be kept in.
+
 ## FIXMEs
 
-* I want to make the 7-segment display prettier, rounded line ends, etc.
 * It'd be nice not to have to run as root.
-* A systemctl unit file to run it as a service is coming soon.
-* A config file that lets you configure the display timeout, background and 
-  foreground colors, SQLite database location, the start time of a new week, and
-  the number of hours which changes the background color.
+* A systemd unit file to run it as a service is coming soon.
 * Provide some simple web UI to see/edit the database time range entries
 * Clean up old database time range entries automatically
-* If it crashes for some reason, any existing timers won't get stopped.
+* If it crashes for some reason, any existing timers won't get stopped. Should
+  they?
 * Maybe the screen should blink on whenever the elapsed_time crosses an hour?
-* Draw a progress bar from 0 - 40 hours?
-* Display the day of the week.

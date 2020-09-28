@@ -3,18 +3,11 @@ import board, digitalio
 from adafruit_rgb_display.rgb import color565
 import adafruit_rgb_display.st7789 as st7789
 
-import threading, sys, time, sqlite3, signal, os, pprint
+import threading, sys, time, sqlite3, signal, os, pprint, yaml
 from datetime import datetime, timedelta
 
-
 # Setup the screen and buttons
-background_under40 = color565(0, 0, 255)
-background_over40 = color565(255, 0, 0)
-background = background_under40
-foreground = color565(255, 255, 255)
-screen_delay = 10
 now = datetime.now()
-timeout = now.timestamp()+screen_delay
 cs_pin = digitalio.DigitalInOut(board.CE0)
 dc_pin = digitalio.DigitalInOut(board.D25)
 reset_pin = None
@@ -37,9 +30,9 @@ buttonB = digitalio.DigitalInOut(board.D24)
 buttonA.switch_to_input()
 buttonB.switch_to_input()
 
-# Database
-conn = sqlite3.connect('pizerotimer.db')
-db = conn.cursor()
+# Status Bar globals
+status_bar_width = 220
+status_bar_height = 10
 
 # The timer
 elapsed_seconds = 0
@@ -61,47 +54,113 @@ def backlight_timer(name):
         now = datetime.now()
         if timeout > now.timestamp():
             backlight.value = True        
-            sys.stdout.flush()
         else:
             backlight.value = False
         time.sleep(0.1)
 
 def display_timer(name):
-    global background
+    global background_color
     global timeout
-    while True:
+    text = 'aa:aa:aa'
+    day_of_week = -1
+    while True:    
+        now = datetime.now()
+        last_day = day_of_week
+        day_of_week = now.weekday()
+        if last_day != day_of_week:
+            draw_days(day_of_week)
         hours, remainder = divmod(elapsed_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
+        last_text = text
         text = '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
-        if hours > 40 and background != background_over40:
-            background = background_over40
+        if hours > int(config['options']['background_threshold']) and background_color != background_over_threshold:
+            background_color = background_over_threshold
             screen_setup()
-            timeout = now.timestamp() + screen_delay
-        if hours < 40 and background != background_under40:
-            background = background_under40
+            timeout = now.timestamp() + int(config['options']['display_timeout'])
+        if hours < int(config['options']['background_threshold']) and background_color != background_under_threshold:
+            background_color = background_under_threshold
             screen_setup()
-        display_digit(10, 10, text[0])
-        display_digit(40, 10, text[1])
-        display_digit(80, 10, text[3])
-        display_digit(110, 10, text[4])
-        display_digit(150, 10, text[6])
-        display_digit(180, 10, text[7])
+
+        # Update any digits that have changed since last screen update
+        if (last_text[0] != text[0]):
+            display_digit(10, 10, text[0], foreground_color, background_color)
+        if (last_text[1] != text[1]):
+            display_digit(40, 10, text[1], foreground_color, background_color)
+        if (last_text[3] != text[3]):
+            display_digit(80, 10, text[3], foreground_color, background_color)
+        if (last_text[4] != text[4]):
+            display_digit(110, 10, text[4], foreground_color, background_color)
+        if (last_text[6] != text[6]):
+            display_digit(150, 10, text[6], foreground_color, background_color)
+        if (last_text[7] != text[7]):
+            display_digit(180, 10, text[7], foreground_color, background_color)
+        if seconds == 0:
+            display_bar()
+        time.sleep(0.1)
+
+def display_bar():
+    bar_complete = (status_bar_width-2) * (elapsed_seconds / (config['options']['status_bar_max']*60*60))
+    if bar_complete > (status_bar_width-2):
+       bar_complete = status_bar_width-2
+    display.fill_rectangle(11, 91, int(bar_complete), status_bar_height-2, status_bar_color)
+    display.fill_rectangle(11+int(bar_complete)+1 , 91, (status_bar_width-2)-int(bar_complete), status_bar_height-2, test_color)
 
 def screen_setup():
-    display.fill(background)
-    display.fill_rectangle(70, 30, 5, 5, foreground)
-    display.fill_rectangle(70, 60, 5, 5, foreground)
-    display.fill_rectangle(140, 30, 5, 5, foreground)
-    display.fill_rectangle(140, 60, 5, 5, foreground)
+    """ Draw background, colons, and outline of status bar """
+    global timeout
+    display.fill(background_color)
+    display.fill_rectangle(70 , 30, 5, 5, foreground_color)
+    display.fill_rectangle(70 , 60, 5, 5, foreground_color)
+    display.fill_rectangle(140, 30, 5, 5, foreground_color)
+    display.fill_rectangle(140, 60, 5, 5, foreground_color)
+    display.fill_rectangle(10 , 90, 1, status_bar_height, status_bar_color)
+    display.fill_rectangle(230, 90, 1, status_bar_height, status_bar_color)
+    display.fill_rectangle(10 , 90, status_bar_width, 1, status_bar_color)
+    display.fill_rectangle(10 , 90+status_bar_height, status_bar_width, 1, status_bar_color)
+    draw_days()
 
-def display_digit(x, y, number):
-    display.fill_rectangle(x+5, y+0, 15, 5, (foreground if number in ['2','3','5','6','7','8','9','0'] else background)) # top bar
-    display.fill_rectangle(x+0, y+5, 5, 30, (foreground if number in ['4','5','6','8','9','0'] else background)) # top left
-    display.fill_rectangle(x+20, y+5, 5, 30, (foreground if number in ['1','2','3','4','7','8','9','0'] else background)) # top right
-    display.fill_rectangle(x+5, y+35, 15, 5, (foreground if number  in ['2','3','4','5','6','8','9'] else background)) # center bar
-    display.fill_rectangle(x+0, y+40, 5, 30, (foreground if number in ['2','6','8','0'] else background)) # bottom left
-    display.fill_rectangle(x+20, y+40, 5, 30, (foreground if number in ['1','3','4','5','6','7','8','9','0'] else background)) # bottom right
-    display.fill_rectangle(x+5, y+70, 15, 5, (foreground if number in ['2','3','5','6','8','9','0'] else background)) # bottom bar
+def draw_days(day_of_week=-1):
+    display_dow(15 , 190, 'S', active_day_color if day_of_week == 6 else inactive_day_color, background_color)
+    display_dow(45 , 190, 'M', active_day_color if day_of_week == 0 else inactive_day_color, background_color)
+    display_dow(75 , 190, 'T', active_day_color if day_of_week == 1 else inactive_day_color, background_color)
+    display_dow(105, 190, 'W', active_day_color if day_of_week == 2 else inactive_day_color, background_color)
+    display_dow(135, 190, 'T', active_day_color if day_of_week == 3 else inactive_day_color, background_color)
+    display_dow(165, 190, 'F', active_day_color if day_of_week == 4 else inactive_day_color, background_color)
+    display_dow(195, 190, 'S', active_day_color if day_of_week == 5 else inactive_day_color, background_color)
+
+def display_dow(x, y, letter, fg_color, bg_color):
+    display.fill_rectangle(x+3   , y     , 10  , 3   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
+    display.fill_rectangle(x+3-1 , y+1   , 12  , 1   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
+    display.fill_rectangle(x     , y+3   , 3   , 15  , (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
+    display.fill_rectangle(x+1   , y+3-1 , 1   , 15+2, (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
+    display.fill_rectangle(x+6   , y+3   , 3   , 15  , (fg_color if letter in ['M','T'] else bg_color)) # top center
+    display.fill_rectangle(x+13  , y+3   , 3   , 15  , (fg_color if letter in ['M','W'] else bg_color)) # top right
+    display.fill_rectangle(x+13+1, y+3-1 , 1   , 15+2, (fg_color if letter in ['M','W'] else bg_color)) # top right
+    display.fill_rectangle(x+3   , y+18  , 10  , 3   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
+    display.fill_rectangle(x+3-1 , y+18+1, 12  , 1   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
+    display.fill_rectangle(x     , y+21  , 3   , 15  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
+    display.fill_rectangle(x+1   , y+21-1, 1   , 15+2  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
+    display.fill_rectangle(x+6     , y+21  , 3   , 15  , (fg_color if letter in ['W','T'] else bg_color)) # bottom center
+    display.fill_rectangle(x+13  , y+21  , 3   , 15  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
+    display.fill_rectangle(x+13+1, y+21-1, 1   , 15+2  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
+    display.fill_rectangle(x+3   , y+36  , 10  , 3   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
+    display.fill_rectangle(x+3-1   , y+36+1, 12  , 1   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
+
+def display_digit(x, y, number, fg_color, bg_color):
+    display.fill_rectangle(x+5   , y     , 15  , 5   , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
+    display.fill_rectangle(x+5-1 , y+1   , 15+2, 5-2 , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
+    display.fill_rectangle(x     , y+5   , 5   , 30  , (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
+    display.fill_rectangle(x+1   , y+5-1 , 5-2 , 30+2, (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
+    display.fill_rectangle(x+20  , y+5   , 5   , 30  , (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
+    display.fill_rectangle(x+20+1, y+5-1 , 5-2 , 30+2, (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
+    display.fill_rectangle(x+5   , y+35  , 15  , 5   , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
+    display.fill_rectangle(x+5-1 , y+35+1, 15+2, 5-2 , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
+    display.fill_rectangle(x     , y+40  , 5   , 30  , (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
+    display.fill_rectangle(x+1   , y+40-1, 5-2 , 30+2, (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
+    display.fill_rectangle(x+20  , y+40  , 5   , 30  , (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
+    display.fill_rectangle(x+20+1, y+40-1, 5-2 , 30+2, (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
+    display.fill_rectangle(x+5   , y+70  , 15  , 5   , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
+    display.fill_rectangle(x+5-1 , y+70+1, 15+2, 5-2 , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
 
 def database_setup():
     for row in db.execute("select sql from sqlite_master where type = 'table' and name = 'time_log'").fetchall():
@@ -142,7 +201,30 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, quit)
     signal.signal(signal.SIGHUP, start_stop_timer)
 
+    with open(r'/etc/pizerotimer.yml') as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Database Setup
+    conn = sqlite3.connect(config['options']['database'])
+    db = conn.cursor()
     database_setup()
+
+    # Setup screen
+    (r, g, b) = config['colors']['background_under_threshold'].split(',')
+    background_under_threshold = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['background_over_threshold'].split(',')
+    background_over_threshold = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['status_bar_color'].split(',')
+    status_bar_color = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['foreground_color'].split(',')
+    foreground_color = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['active_day_color'].split(',')
+    active_day_color = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['inactive_day_color'].split(',')
+    inactive_day_color = color565(int(r), int(g), int(b))
+    test_color = color565(0,0,0)
+    background_color = background_under_threshold
+    timeout = now.timestamp() + 2 * int(config['options']['display_timeout'])
     screen_setup()
 
     # backlight monitoring thread
@@ -152,7 +234,6 @@ if __name__ == "__main__":
     # timer display thread
     y = threading.Thread(target=display_timer, args=(1,), daemon=True)
     y.start()
-
 
     # FIXME: This is pegging the CPU waiting for a button press. We should
     # make this more reactive instead and hopefully eliminate the 0.1 sleep
@@ -164,7 +245,7 @@ if __name__ == "__main__":
 
         if not (buttonA.value and buttonB.value):
             # Either button is pressed
-            timeout = now.timestamp() + screen_delay
+            timeout = now.timestamp() + config['options']['display_timeout']
         if buttonB.value and not buttonA.value:  # just button A pressed
             start_stop_timer()
         #if buttonA.value and not buttonB.value:  # just button B pressed
