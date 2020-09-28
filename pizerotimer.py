@@ -3,7 +3,7 @@ import board, digitalio
 from adafruit_rgb_display.rgb import color565
 import adafruit_rgb_display.st7789 as st7789
 
-import threading, sys, time, sqlite3, signal, os, pprint, yaml
+import threading, sys, time, sqlite3, signal, os, pprint, yaml, pytz
 from datetime import datetime, timedelta
 
 # Setup the screen and buttons
@@ -187,9 +187,9 @@ def stop_timer():
 def time_this_week():
     now = datetime.now()
     day_of_week = now.weekday()
-    start_of_week = now - timedelta(days=day_of_week, seconds=now.second, microseconds=now.microsecond, minutes=now.minute, hours=now.hour)
+    timezone_delta = local_tz.localize(now) - pytz.utc.localize(now)
+    start_of_week = now - timedelta(days=day_of_week, seconds=now.second, microseconds=now.microsecond, minutes=now.minute, hours=now.hour) + timezone_delta
     start_of_week_string = start_of_week.strftime('%Y-%m-%d %H:%M:%S')
-    sys.stdout.flush()
     elapsed_time = 0
     for row in db.execute("select strftime('%s',ifnull(dt_finish,'now'))-strftime('%s',dt_start) from time_log where dt_start>=?", (start_of_week_string,)).fetchall():
         elapsed_time += row[0]
@@ -203,6 +203,10 @@ if __name__ == "__main__":
 
     with open(r'/etc/pizerotimer.yml') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # date/times in database will be UTC - need this for determining "local"
+    # start of week.
+    local_tz = pytz.timezone(config['options']['local_tz'])
 
     # Database Setup
     conn = sqlite3.connect(config['options']['database'])
