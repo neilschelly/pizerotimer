@@ -63,6 +63,7 @@ def display_timer(name):
     global timeout
     text = 'aa:aa:aa'
     day_of_week = -1
+    first_time_through = True
     while True:    
         now = datetime.now()
         last_day = day_of_week
@@ -94,8 +95,9 @@ def display_timer(name):
             display_digit(150, 10, text[6], foreground_color, background_color)
         if (last_text[7] != text[7]):
             display_digit(180, 10, text[7], foreground_color, background_color)
-        if seconds == 0:
+        if seconds == 0 or first_time_through:
             display_bar()
+        first_time_through = False
         time.sleep(0.1)
 
 def display_bar():
@@ -103,7 +105,16 @@ def display_bar():
     if bar_complete > (status_bar_width-2):
        bar_complete = status_bar_width-2
     display.fill_rectangle(11, 91, int(bar_complete), status_bar_height-2, status_bar_color)
-    display.fill_rectangle(11+int(bar_complete)+1 , 91, (status_bar_width-2)-int(bar_complete), status_bar_height-2, test_color)
+    display.fill_rectangle(11+int(bar_complete)+1 , 91, (status_bar_width-2)-int(bar_complete), status_bar_height-2, status_bar_outline_color)
+    if (config['options']['status_bar_segments'] > 0):
+        display_bar_segments()
+
+def display_bar_segments():
+    spacing = int(status_bar_width/config['options']['status_bar_segments'])
+    xpos = 0
+    while (xpos <= status_bar_width):
+        display.fill_rectangle(10+xpos , 88, 1, status_bar_height+4, status_bar_outline_color)
+        xpos += spacing
 
 def screen_setup():
     """ Draw background, colons, and outline of status bar """
@@ -220,6 +231,8 @@ if __name__ == "__main__":
     background_over_threshold = color565(int(r), int(g), int(b))
     (r, g, b) = config['colors']['status_bar_color'].split(',')
     status_bar_color = color565(int(r), int(g), int(b))
+    (r, g, b) = config['colors']['status_bar_outline_color'].split(',')
+    status_bar_outline_color = color565(int(r), int(g), int(b))
     (r, g, b) = config['colors']['foreground_color'].split(',')
     foreground_color = color565(int(r), int(g), int(b))
     (r, g, b) = config['colors']['active_day_color'].split(',')

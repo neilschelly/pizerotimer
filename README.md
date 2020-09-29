@@ -59,7 +59,7 @@ directory that your SQLite database will be kept in.
 
 ## FIXMEs an Improvements
 
-* Add vertical lines at regular (configurable) intervals through the progress bar. (for folks who might work 4x10 or 5x8 or some other arrangement of hours/days.
+* Support screen sizes that aren't 240x240?
 * It'd be nice not to have to run as root.
 * A systemd unit file to run it as a service is coming soon.
 * Provide some simple web UI to see/edit the database time range entries

@@ -3,12 +3,14 @@ colors:
     background_over_threshold: "255,0,0"
     foreground_color: "255,255,255"
     status_bar_color: "255,10,0"
+    status_bar_outline_color: "0,0,0"
     inactive_day_color: "255,255,255"
     active_day_color: "0,0,0"
 
 options:
     background_threshold: 40
     status_bar_max: 40
+    status_bar_segments: 5
     display_timeout: 10
     # Must create directory and ensure it's writable
     database: /var/lib/pizerotimer/pizerotimer.db
