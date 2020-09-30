@@ -51,7 +51,10 @@ Use raspi-config to enable both the SPI and I2C interfaces via the
 ```bash
 sudo apt-get install python3 pip3 sqlite3
 sudo pip3 install -r requirements.txt
-sudo ./pizerotimer.py
+sudo cp pizerotimer.py /usr/local/bin/
+sudo cp pizerotimer.service /etc/systemd/system
+sudo systemctl enable pizerotimer.service
+sudo systemctl start pizerotimer.service
 ```
 
 Put the `pizerotimer.yml` file at `/etc/pizerotimer.yml` and create the
@@ -60,10 +63,11 @@ directory that your SQLite database will be kept in.
 ## FIXMEs an Improvements
 
 * Support screen sizes that aren't 240x240?
-* It'd be nice not to have to run as root.
-* A systemd unit file to run it as a service is coming soon.
 * Provide some simple web UI to see/edit the database time range entries
 * Clean up old database time range entries automatically
-* If it crashes for some reason, any existing timers won't get stopped. Should
-  they?
+* If it crashes for some reason, any existing timers won't get stopped. Should they?
+    * I could have another SQL table that is just a timestamp updated as the
+      program runs. If power to the Pi goes away, it will be roughly the
+      last time it was running. If the service starts up and sees an
+      "open-ended" time log entry, it could use this value to end it.
 * Maybe the screen should blink on whenever the elapsed_time crosses an hour?

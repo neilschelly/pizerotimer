@@ -1,0 +1,12 @@
+[Unit]
+Description=PiZeroTimer
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/pizerotimer.py
+Restart=always
+StartLimitIntervalSec=0
