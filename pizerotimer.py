@@ -77,10 +77,12 @@ def display_timer(name):
         if hours > int(config['options']['background_threshold']) and background_color != background_over_threshold:
             background_color = background_over_threshold
             screen_setup()
-            timeout = now.timestamp() + int(config['options']['display_timeout'])
+            turn_on_backlight()
         if hours < int(config['options']['background_threshold']) and background_color != background_under_threshold:
             background_color = background_under_threshold
             screen_setup()
+        if minutes == 0 and seconds < 5:
+            turn_on_backlight()
 
         # Update any digits that have changed since last screen update
         if (last_text[0] != text[0]):
@@ -124,10 +126,10 @@ def screen_setup():
     display.fill_rectangle(70 , 60, 5, 5, foreground_color)
     display.fill_rectangle(140, 30, 5, 5, foreground_color)
     display.fill_rectangle(140, 60, 5, 5, foreground_color)
-    display.fill_rectangle(10 , 90, 1, status_bar_height, status_bar_color)
-    display.fill_rectangle(230, 90, 1, status_bar_height, status_bar_color)
-    display.fill_rectangle(10 , 90, status_bar_width, 1, status_bar_color)
-    display.fill_rectangle(10 , 90+status_bar_height, status_bar_width, 1, status_bar_color)
+    display.fill_rectangle(10 , 90, 1, status_bar_height, status_bar_outline_color)
+    display.fill_rectangle(230, 90, 1, status_bar_height, status_bar_outline_color)
+    display.fill_rectangle(10 , 90, status_bar_width, 1, status_bar_outline_color)
+    display.fill_rectangle(10 , 90+status_bar_height-1, status_bar_width, 1, status_bar_outline_color)
     draw_days()
 
 def draw_days(day_of_week=-1):
@@ -206,6 +208,11 @@ def time_this_week():
         elapsed_time += row[0]
     return elapsed_time
 
+def turn_on_backlight():
+    global timeout
+    now = datetime.now()
+    timeout = now.timestamp() + 2 * int(config['options']['display_timeout'])
+
 if __name__ == "__main__":
 
     signal.signal(signal.SIGTERM, quit)
@@ -241,7 +248,7 @@ if __name__ == "__main__":
     inactive_day_color = color565(int(r), int(g), int(b))
     test_color = color565(0,0,0)
     background_color = background_under_threshold
-    timeout = now.timestamp() + 2 * int(config['options']['display_timeout'])
+    turn_on_backlight()
     screen_setup()
 
     # backlight monitoring thread
@@ -262,7 +269,7 @@ if __name__ == "__main__":
 
         if not (buttonA.value and buttonB.value):
             # Either button is pressed
-            timeout = now.timestamp() + config['options']['display_timeout']
+            turn_on_backlight()
         if buttonB.value and not buttonA.value:  # just button A pressed
             start_stop_timer()
         #if buttonA.value and not buttonB.value:  # just button B pressed

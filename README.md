@@ -70,4 +70,3 @@ directory that your SQLite database will be kept in.
       program runs. If power to the Pi goes away, it will be roughly the
       last time it was running. If the service starts up and sees an
       "open-ended" time log entry, it could use this value to end it.
-* Maybe the screen should blink on whenever the elapsed_time crosses an hour?
