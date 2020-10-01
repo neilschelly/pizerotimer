@@ -70,3 +70,5 @@ directory that your SQLite database will be kept in.
       program runs. If power to the Pi goes away, it will be roughly the
       last time it was running. If the service starts up and sees an
       "open-ended" time log entry, it could use this value to end it.
+* Make sure to report something to logging if a thread dies off, and maybe start
+  it up again or handle it somehow.

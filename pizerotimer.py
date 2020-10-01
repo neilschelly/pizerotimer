@@ -88,16 +88,16 @@ def display_timer(name):
         if (last_text[0] != text[0]):
             display_digit(10, 10, text[0], foreground_color, background_color)
         if (last_text[1] != text[1]):
-            display_digit(40, 10, text[1], foreground_color, background_color)
+            display_digit(44, 10, text[1], foreground_color, background_color)
         if (last_text[3] != text[3]):
-            display_digit(80, 10, text[3], foreground_color, background_color)
+            display_digit(88, 10, text[3], foreground_color, background_color)
         if (last_text[4] != text[4]):
-            display_digit(110, 10, text[4], foreground_color, background_color)
+            display_digit(122, 10, text[4], foreground_color, background_color)
         if (last_text[6] != text[6]):
-            display_digit(150, 10, text[6], foreground_color, background_color)
+            display_digit(166, 10, text[6], foreground_color, background_color)
         if (last_text[7] != text[7]):
-            display_digit(180, 10, text[7], foreground_color, background_color)
-        if seconds == 0 or first_time_through:
+            display_digit(200, 10, text[7], foreground_color, background_color)
+        if first_time_through or (seconds == 0 and last_text != text):
             display_bar()
         first_time_through = False
         time.sleep(0.1)
@@ -122,10 +122,10 @@ def screen_setup():
     """ Draw background, colons, and outline of status bar """
     global timeout
     display.fill(background_color)
-    display.fill_rectangle(70 , 30, 5, 5, foreground_color)
-    display.fill_rectangle(70 , 60, 5, 5, foreground_color)
-    display.fill_rectangle(140, 30, 5, 5, foreground_color)
-    display.fill_rectangle(140, 60, 5, 5, foreground_color)
+    display.fill_rectangle(78 , 30, 5, 5, foreground_color) # left colon top
+    display.fill_rectangle(78 , 60, 5, 5, foreground_color) # left colon bottom
+    display.fill_rectangle(156, 30, 5, 5, foreground_color) # right colon top
+    display.fill_rectangle(156, 60, 5, 5, foreground_color) # right colon bottom
     display.fill_rectangle(10 , 90, 1, status_bar_height, status_bar_outline_color)
     display.fill_rectangle(230, 90, 1, status_bar_height, status_bar_outline_color)
     display.fill_rectangle(10 , 90, status_bar_width, 1, status_bar_outline_color)
@@ -134,46 +134,52 @@ def screen_setup():
 
 def draw_days(day_of_week=-1):
     display_dow(15 , 190, 'S', active_day_color if day_of_week == 6 else inactive_day_color, background_color)
-    display_dow(45 , 190, 'M', active_day_color if day_of_week == 0 else inactive_day_color, background_color)
-    display_dow(75 , 190, 'T', active_day_color if day_of_week == 1 else inactive_day_color, background_color)
-    display_dow(105, 190, 'W', active_day_color if day_of_week == 2 else inactive_day_color, background_color)
-    display_dow(135, 190, 'T', active_day_color if day_of_week == 3 else inactive_day_color, background_color)
-    display_dow(165, 190, 'F', active_day_color if day_of_week == 4 else inactive_day_color, background_color)
-    display_dow(195, 190, 'S', active_day_color if day_of_week == 5 else inactive_day_color, background_color)
+    display_dow(47 , 190, 'M', active_day_color if day_of_week == 0 else inactive_day_color, background_color)
+    display_dow(79 , 190, 'T', active_day_color if day_of_week == 1 else inactive_day_color, background_color)
+    display_dow(111, 190, 'W', active_day_color if day_of_week == 2 else inactive_day_color, background_color)
+    display_dow(143, 190, 'T', active_day_color if day_of_week == 3 else inactive_day_color, background_color)
+    display_dow(175, 190, 'F', active_day_color if day_of_week == 4 else inactive_day_color, background_color)
+    display_dow(207, 190, 'S', active_day_color if day_of_week == 5 else inactive_day_color, background_color)
 
 def display_dow(x, y, letter, fg_color, bg_color):
-    display.fill_rectangle(x+3   , y     , 10  , 3   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
-    display.fill_rectangle(x+3-1 , y+1   , 12  , 1   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
-    display.fill_rectangle(x     , y+3   , 3   , 15  , (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
-    display.fill_rectangle(x+1   , y+3-1 , 1   , 15+2, (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
-    display.fill_rectangle(x+6   , y+3   , 3   , 15  , (fg_color if letter in ['M','T'] else bg_color)) # top center
-    display.fill_rectangle(x+13  , y+3   , 3   , 15  , (fg_color if letter in ['M','W'] else bg_color)) # top right
-    display.fill_rectangle(x+13+1, y+3-1 , 1   , 15+2, (fg_color if letter in ['M','W'] else bg_color)) # top right
-    display.fill_rectangle(x+3   , y+18  , 10  , 3   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
-    display.fill_rectangle(x+3-1 , y+18+1, 12  , 1   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
-    display.fill_rectangle(x     , y+21  , 3   , 15  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
-    display.fill_rectangle(x+1   , y+21-1, 1   , 15+2  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
-    display.fill_rectangle(x+6     , y+21  , 3   , 15  , (fg_color if letter in ['W','T'] else bg_color)) # bottom center
-    display.fill_rectangle(x+13  , y+21  , 3   , 15  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
-    display.fill_rectangle(x+13+1, y+21-1, 1   , 15+2  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
-    display.fill_rectangle(x+3   , y+36  , 10  , 3   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
-    display.fill_rectangle(x+3-1   , y+36+1, 12  , 1   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
+    bar_width = 3
+    hbar_length = 14
+    vbar_length = 15
+    display.fill_rectangle(x+bar_width   , y     , hbar_length  , bar_width   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
+    display.fill_rectangle(x+bar_width-1 , y+1   , hbar_length+2  , 1   , (fg_color if letter in ['S','M','T','F'] else bg_color)) # top bar
+    display.fill_rectangle(x     , y+bar_width   , bar_width   , vbar_length  , (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
+    display.fill_rectangle(x+1   , y+bar_width-1 , 1   , vbar_length+2, (fg_color if letter in ['S','M','W','F'] else bg_color)) # top left
+    display.fill_rectangle(x+int((hbar_length+bar_width)/2)   , y+bar_width   , bar_width   , vbar_length  , (fg_color if letter in ['M','T'] else bg_color)) # top center
+    display.fill_rectangle(x+hbar_length+bar_width  , y+bar_width   , bar_width   , vbar_length  , (fg_color if letter in ['M','W'] else bg_color)) # top right
+    display.fill_rectangle(x+hbar_length+bar_width+1, y+bar_width-1 , 1   , vbar_length+2, (fg_color if letter in ['M','W'] else bg_color)) # top right
+    display.fill_rectangle(x+bar_width   , y+vbar_length+bar_width  , hbar_length  , bar_width   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
+    display.fill_rectangle(x+bar_width-1 , y+vbar_length+bar_width+1, hbar_length+2  , 1   , (fg_color if letter in ['S','F'] else bg_color)) # center bar
+    display.fill_rectangle(x     , y+vbar_length+2*bar_width  , bar_width   , vbar_length  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
+    display.fill_rectangle(x+1   , y+vbar_length+2*bar_width-1, 1   , vbar_length+2  , (fg_color if letter in ['M','W','F'] else bg_color)) # bottom left
+    display.fill_rectangle(x+int((hbar_length+bar_width)/2)     , y+vbar_length+2*bar_width  , bar_width   , vbar_length  , (fg_color if letter in ['W','T'] else bg_color)) # bottom center
+    display.fill_rectangle(x+hbar_length+bar_width  , y+vbar_length+2*bar_width  , bar_width   , vbar_length  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
+    display.fill_rectangle(x+hbar_length+bar_width+1, y+vbar_length+2*bar_width-1, 1   , vbar_length+2  , (fg_color if letter in ['S','M','W'] else bg_color)) # bottom right
+    display.fill_rectangle(x+bar_width   , y+2*vbar_length+2*bar_width  , hbar_length  , bar_width   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
+    display.fill_rectangle(x+bar_width-1   , y+2*vbar_length+2*bar_width+1, hbar_length+2  , 1   , (fg_color if letter in ['S','W'] else bg_color)) # bottom bar
 
 def display_digit(x, y, number, fg_color, bg_color):
-    display.fill_rectangle(x+5   , y     , 15  , 5   , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
-    display.fill_rectangle(x+5-1 , y+1   , 15+2, 5-2 , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
-    display.fill_rectangle(x     , y+5   , 5   , 30  , (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
-    display.fill_rectangle(x+1   , y+5-1 , 5-2 , 30+2, (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
-    display.fill_rectangle(x+20  , y+5   , 5   , 30  , (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
-    display.fill_rectangle(x+20+1, y+5-1 , 5-2 , 30+2, (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
-    display.fill_rectangle(x+5   , y+35  , 15  , 5   , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
-    display.fill_rectangle(x+5-1 , y+35+1, 15+2, 5-2 , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
-    display.fill_rectangle(x     , y+40  , 5   , 30  , (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
-    display.fill_rectangle(x+1   , y+40-1, 5-2 , 30+2, (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
-    display.fill_rectangle(x+20  , y+40  , 5   , 30  , (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
-    display.fill_rectangle(x+20+1, y+40-1, 5-2 , 30+2, (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
-    display.fill_rectangle(x+5   , y+70  , 15  , 5   , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
-    display.fill_rectangle(x+5-1 , y+70+1, 15+2, 5-2 , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
+    bar_width = 5
+    hbar_length = 15
+    vbar_length = 30
+    display.fill_rectangle(x+bar_width   , y     , hbar_length  , bar_width   , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
+    display.fill_rectangle(x+bar_width-1 , y+1   , hbar_length+2, bar_width-2 , (fg_color if number in ['2','3','5','6','7','8','9','0'] else bg_color)) # top bar
+    display.fill_rectangle(x     , y+bar_width   , bar_width   , vbar_length  , (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
+    display.fill_rectangle(x+1   , y+bar_width-1 , bar_width-2 , vbar_length+2, (fg_color if number in ['4','5','6','8','9','0'] else bg_color)) # top left
+    display.fill_rectangle(x+bar_width+hbar_length  , y+bar_width   , bar_width   , vbar_length  , (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
+    display.fill_rectangle(x+bar_width+hbar_length+1, y+bar_width-1 , bar_width-2 , vbar_length+2, (fg_color if number in ['1','2','3','4','7','8','9','0'] else bg_color)) # top right
+    display.fill_rectangle(x+bar_width   , y+vbar_length+bar_width  , hbar_length  , bar_width   , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
+    display.fill_rectangle(x+bar_width-1 , y+vbar_length+bar_width+1, hbar_length+2, bar_width-2 , (fg_color if number in ['2','3','4','5','6','8','9'] else bg_color)) # center bar
+    display.fill_rectangle(x     , y+vbar_length+2*bar_width  , bar_width   , vbar_length  , (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
+    display.fill_rectangle(x+1   , y+vbar_length+2*bar_width-1, bar_width-2 , vbar_length+2, (fg_color if number in ['2','6','8','0'] else bg_color)) # bottom left
+    display.fill_rectangle(x+bar_width+hbar_length  , y+vbar_length+2*bar_width  , bar_width   , vbar_length  , (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
+    display.fill_rectangle(x+bar_width+hbar_length+1, y+vbar_length+2*bar_width-1, bar_width-2 , vbar_length+2, (fg_color if number in ['1','3','4','5','6','7','8','9','0'] else bg_color)) # bottom right
+    display.fill_rectangle(x+bar_width   , y+2*(vbar_length+bar_width)  , hbar_length  , bar_width   , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
+    display.fill_rectangle(x+bar_width-1 , y+2*(vbar_length+bar_width)+1, hbar_length+2, bar_width-2 , (fg_color if number in ['2','3','5','6','8','9','0'] else bg_color)) # bottom bar
 
 def database_setup():
     for row in db.execute("select sql from sqlite_master where type = 'table' and name = 'time_log'").fetchall():
