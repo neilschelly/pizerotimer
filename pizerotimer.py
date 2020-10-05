@@ -84,7 +84,8 @@ def display_timer(name):
             background_color = background_under_threshold
             screen_setup()
         if ( minutes == 0 and seconds < 5
-             and text != last_text):
+             and text != last_text
+             and text != '00:00:00'):
             turn_on_backlight()
 
         # Update any digits that have changed since last screen update
