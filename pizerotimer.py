@@ -74,14 +74,17 @@ def display_timer(name):
         minutes, seconds = divmod(remainder, 60)
         last_text = text
         text = '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
-        if hours > int(config['options']['background_threshold']) and background_color != background_over_threshold:
+        if ( hours > int(config['options']['background_threshold'])
+             and background_color != background_over_threshold ):
             background_color = background_over_threshold
             screen_setup()
             turn_on_backlight()
-        if hours < int(config['options']['background_threshold']) and background_color != background_under_threshold:
+        if ( hours < int(config['options']['background_threshold'])
+             and background_color != background_under_threshold ):
             background_color = background_under_threshold
             screen_setup()
-        if minutes == 0 and seconds < 5:
+        if ( minutes == 0 and seconds < 5
+             and text != last_text):
             turn_on_backlight()
 
         # Update any digits that have changed since last screen update
