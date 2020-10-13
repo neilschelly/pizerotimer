@@ -32,6 +32,8 @@ sudo ./pizerotimer.py
   any outstanding timers, turn off the backlight, and exit.
 * Sending a `HUP` signal to the application will start/stop the timer, just like
   hitting the bottom-right button.
+* Press-and-hold the top button for 4-5 seconds, and it will shut down the Pi
+  Zero.
 
 ## Hardware
 
@@ -62,6 +64,8 @@ directory that your SQLite database will be kept in.
 
 ## FIXMEs an Improvements
 
+* After shutting down, the backlight comes back on. No idea why. It's a bug, but
+  it's convenient, so I don't think I'll fix it.
 * Support screen sizes that aren't 240x240?
 * Provide some simple web UI to see/edit the database time range entries
 * Clean up old database time range entries automatically

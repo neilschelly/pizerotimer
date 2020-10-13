@@ -3,7 +3,7 @@ import board, digitalio
 from adafruit_rgb_display.rgb import color565
 import adafruit_rgb_display.st7789 as st7789
 
-import threading, sys, time, sqlite3, signal, os, pprint, yaml, pytz
+import threading, sys, time, sqlite3, signal, os, pprint, yaml, pytz, os
 from datetime import datetime, timedelta
 
 # Setup the screen and buttons
@@ -37,7 +37,7 @@ status_bar_height = 10
 # The timer
 elapsed_seconds = 0
 
-def quit(signum, frame):
+def quit(signum=None, frame=None, shutdown=False):
     print("Exiting...")
     sys.stdout.flush()
     stop_timer()
@@ -45,7 +45,11 @@ def quit(signum, frame):
     global timeout
     timeout = 0
     backlight.value = False
-    sys.exit(0)
+    if shutdown:
+        os.system('/bin/systemctl poweroff')
+        sys.exit(0)
+    else:
+        sys.exit(0)
 
 def backlight_timer(name):
     global backlight
@@ -64,7 +68,7 @@ def display_timer(name):
     text = 'aa:aa:aa'
     day_of_week = -1
     first_time_through = True
-    while True:    
+    while True:
         now = datetime.now()
         last_day = day_of_week
         day_of_week = now.weekday()
@@ -274,6 +278,7 @@ if __name__ == "__main__":
     # FIXME: This is pegging the CPU waiting for a button press. We should
     # make this more reactive instead and hopefully eliminate the 0.1 sleep
     # after responding to a button press
+    poweroff_cycles = 0
     while True:
         time.sleep(0.1)
         now = datetime.now()
@@ -284,7 +289,11 @@ if __name__ == "__main__":
             turn_on_backlight()
         if buttonB.value and not buttonA.value:  # just button A pressed
             start_stop_timer()
-        #if buttonA.value and not buttonB.value:  # just button B pressed
-        #    display.fill(color565(0, 0, 255))  # blue
-        #if not buttonA.value and not buttonB.value:  # none pressed
-        #    display.fill(color565(0, 255, 0))  # green
+        if buttonA.value and not buttonB.value:  # just button B pressed
+            poweroff_cycles += 1
+        if not buttonA.value and not buttonB.value:  # none pressed
+            poweroff_cycles = 0
+
+        if poweroff_cycles > 50:
+            quit(shutdown=True)
+            break
