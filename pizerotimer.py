@@ -284,16 +284,17 @@ if __name__ == "__main__":
         now = datetime.now()
         elapsed_seconds = time_this_week()
 
-        if not (buttonA.value and buttonB.value):
-            # Either button is pressed
+        if not (buttonA.value and buttonB.value):    # Either button is pressed
             turn_on_backlight()
-        if buttonB.value and not buttonA.value:  # just button A pressed
+        if buttonB.value and not buttonA.value:      # just button A pressed
             start_stop_timer()
-        if buttonA.value and not buttonB.value:  # just button B pressed
+        if buttonA.value and not buttonB.value:      # just button B pressed
             poweroff_cycles += 1
-        if not buttonA.value and not buttonB.value:  # none pressed
+        else:
             poweroff_cycles = 0
+        # if not buttonA.value and not buttonB.value:  # none pressed
+            # Do Stuff
 
         if poweroff_cycles > 50:
-            quit(shutdown=True)
             break
+    quit(shutdown=True)
