@@ -82,11 +82,13 @@ def display_timer(name):
              and background_color != background_over_threshold ):
             background_color = background_over_threshold
             screen_setup()
+            text = 'aa:aa:aa'
             turn_on_backlight()
         if ( hours < int(config['options']['background_threshold'])
              and background_color != background_under_threshold ):
             background_color = background_under_threshold
             screen_setup()
+            text = 'aa:aa:aa'
         if ( minutes == 0 and seconds < 5
              and text != last_text
              and text != '00:00:00'):
