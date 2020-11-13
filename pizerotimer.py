@@ -65,6 +65,7 @@ def backlight_timer(name):
 def display_timer(name):
     global background_color
     global timeout
+    force_redraw = False
     text = 'aa:aa:aa'
     day_of_week = -1
     first_time_through = True
@@ -81,35 +82,36 @@ def display_timer(name):
         if ( hours > int(config['options']['background_threshold'])
              and background_color != background_over_threshold ):
             background_color = background_over_threshold
+            force_redraw = True
             screen_setup()
-            text = 'aa:aa:aa'
             turn_on_backlight()
         if ( hours < int(config['options']['background_threshold'])
              and background_color != background_under_threshold ):
             background_color = background_under_threshold
+            force_redraw = True
             screen_setup()
-            text = 'aa:aa:aa'
         if ( minutes == 0 and seconds < 5
              and text != last_text
              and text != '00:00:00'):
             turn_on_backlight()
 
         # Update any digits that have changed since last screen update
-        if (last_text[0] != text[0]):
+        if (last_text[0] != text[0] or force_redraw):
             display_digit(10, 10, text[0], foreground_color, background_color)
-        if (last_text[1] != text[1]):
+        if (last_text[1] != text[1] or force_redraw):
             display_digit(44, 10, text[1], foreground_color, background_color)
-        if (last_text[3] != text[3]):
+        if (last_text[3] != text[3] or force_redraw):
             display_digit(88, 10, text[3], foreground_color, background_color)
-        if (last_text[4] != text[4]):
+        if (last_text[4] != text[4] or force_redraw):
             display_digit(122, 10, text[4], foreground_color, background_color)
-        if (last_text[6] != text[6]):
+        if (last_text[6] != text[6] or force_redraw):
             display_digit(166, 10, text[6], foreground_color, background_color)
-        if (last_text[7] != text[7]):
+        if (last_text[7] != text[7] or force_redraw):
             display_digit(200, 10, text[7], foreground_color, background_color)
         if first_time_through or (seconds == 0 and last_text != text):
             display_bar()
         first_time_through = False
+        force_redraw = False
         time.sleep(0.1)
 
 def display_bar():
