@@ -79,7 +79,7 @@ def display_timer(name):
         minutes, seconds = divmod(remainder, 60)
         last_text = text
         text = '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
-        if ( hours > int(config['options']['background_threshold'])
+        if ( hours >= int(config['options']['background_threshold'])
              and background_color != background_over_threshold ):
             background_color = background_over_threshold
             force_redraw = True
