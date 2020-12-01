@@ -296,7 +296,7 @@ if __name__ == "__main__":
             skip_button_a = True # Ignore additoinal Button A hits until nothing
         if buttonA.value and not buttonB.value:      # just button B pressed
             poweroff_cycles += 1
-        if not buttonA.value and not buttonB.value:  # none pressed
+        if buttonA.value and buttonB.value:  # none pressed
             poweroff_cycles = 0
             skip_button_a = False
 
