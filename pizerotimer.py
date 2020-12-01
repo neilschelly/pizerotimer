@@ -283,21 +283,22 @@ if __name__ == "__main__":
     # make this more reactive instead and hopefully eliminate the 0.1 sleep
     # after responding to a button press
     poweroff_cycles = 0
+    skip_button_a = False
     while True:
         time.sleep(0.1)
         now = datetime.now()
         elapsed_seconds = time_this_week()
-
+        
         if not (buttonA.value and buttonB.value):    # Either button is pressed
             turn_on_backlight()
-        if buttonB.value and not buttonA.value:      # just button A pressed
+        if not skip_button_a and buttonB.value and not buttonA.value:      # just button A pressed
             start_stop_timer()
+            skip_button_a = True # Ignore additoinal Button A hits until nothing
         if buttonA.value and not buttonB.value:      # just button B pressed
             poweroff_cycles += 1
-        else:
+        if not buttonA.value and not buttonB.value:  # none pressed
             poweroff_cycles = 0
-        # if not buttonA.value and not buttonB.value:  # none pressed
-            # Do Stuff
+            skip_button_a = False
 
         if poweroff_cycles > 50:
             break
