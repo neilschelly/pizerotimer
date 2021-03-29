@@ -218,10 +218,27 @@ def stop_timer():
     return True
 
 def time_this_week():
+    if config['options']['start_day'] == "saturday":
+        day_offset = 2
+    elif config['options']['start_day'] == "sunday":
+        day_offset = 1
+    elif config['options']['start_day'] == "monday":
+        day_offset = 0
+    elif config['options']['start_day'] == "tuesday":
+        day_offset = -1
+    elif config['options']['start_day'] == "wednesday":
+        day_offset = -2
+    elif config['options']['start_day'] == "thursday":
+        day_offset = -3
+    elif config['options']['start_day'] == "friday":
+        day_offset = -4
+    else:
+        day_offset = 0 # Monday default
+
     now = datetime.now()
-    day_of_week = now.weekday()
+    day_of_week = now.weekday() # Monday is 0 and Sunday is 6.
     timezone_delta = local_tz.localize(now) - pytz.utc.localize(now)
-    start_of_week = now - timedelta(days=day_of_week, seconds=now.second, microseconds=now.microsecond, minutes=now.minute, hours=now.hour) + timezone_delta
+    start_of_week = now - timedelta(days=day_of_week+day_offset, seconds=now.second, microseconds=now.microsecond, minutes=now.minute, hours=now.hour) + timezone_delta
     start_of_week_string = start_of_week.strftime('%Y-%m-%d %H:%M:%S')
     elapsed_time = 0
     for row in db.execute("select strftime('%s',ifnull(dt_finish,'now'))-strftime('%s',dt_start) from time_log where dt_start>=?", (start_of_week_string,)).fetchall():

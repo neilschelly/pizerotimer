@@ -15,3 +15,4 @@ options:
     # Must create directory and ensure it's writable
     database: /var/lib/pizerotimer/pizerotimer.db
     local_tz: US/Eastern # From PyTZ
+    start_day: saturday
